@@ -7,8 +7,10 @@ typedef struct {
     gbClient cl;
 } client_obj;
 
+static PyObject * cmd_ping(client_obj *self);
 
 static PyMethodDef client_methods[] = {
+    {"ping", (PyCFunction)cmd_ping, METH_NOARGS, "do ping"},
     {NULL}
 };
 
@@ -67,12 +69,12 @@ static PyMethodDef module_methods[] = {
     {NULL}
 };
 
+
 #ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC init_pygibson() {
     PyObject *m;
-    client_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&client_type) < 0) {
         return;
     }
