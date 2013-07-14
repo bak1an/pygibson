@@ -17,10 +17,12 @@ client_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 
 static int
 client_init(client_obj *self, PyObject *args, PyObject *kwds) {
-   int connect = gb_tcp_connect(&self->cl,
-           NULL, 0, 3600);
-   printf("%d\n", connect);
-   return 0;
+    int connect = gb_tcp_connect(&self->cl,
+            NULL, 0, 3600);
+#ifdef PYGIBSON_DEBUG
+    printf("DEBUG: gb_tcp_connect(): %d\n", connect);
+#endif
+    return 0;
 }
 
 static PyObject * cmd_set(client_obj *self, PyObject *args) {

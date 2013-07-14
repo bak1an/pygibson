@@ -1,7 +1,6 @@
 #include <Python.h>
 #include "libgibsonclient/src/gibson.h"
 
-
 typedef struct {
     PyObject_HEAD
     gbClient cl;

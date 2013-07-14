@@ -1,0 +1,2 @@
+include src/_pygibson.h
+include src/libgibsonclient/src/gibson.h
