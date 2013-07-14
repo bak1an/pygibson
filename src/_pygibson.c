@@ -1,5 +1,19 @@
 #include "_pygibson.h"
 
+static PyObject * _gbBuffer2PyObject(gbBuffer buf) {
+    return NULL;
+}
+
+static PyObject * _get_exc(char err_code) {
+    gibson_exception *e;
+    for (e = py_exceptions; e->name != NULL; e++) {
+        if (err_code == e->err_code) return e->exception;
+    }
+    PyErr_SetString(PyExc_Exception,
+            "Enemies everywhere, they are stealing my exceptions!!111");
+    return NULL;
+}
+
 static void
 client_dealloc(client_obj *self) {
     self->ob_type->tp_free((PyObject *)self);
@@ -126,8 +140,9 @@ static PyObject * cmd_encof(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_stats(client_obj *self) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    gbClient *cl = &self->cl;
+    int ret = gb_stats(cl);
+    Py_RETURN_NONE;
 }
 
 static PyObject * cmd_ping(client_obj *self) {

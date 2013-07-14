@@ -1,10 +1,28 @@
 #include <Python.h>
 #include "libgibsonclient/src/gibson.h"
 
-typedef struct {
+typedef struct _client_obj {
     PyObject_HEAD
     gbClient cl;
 } client_obj;
+
+typedef struct _gibson_exception {
+    char err_code;
+    char *name;
+    PyObject *exception;
+} gibson_exception;
+
+static gibson_exception py_exceptions[] = {
+    {REPL_ERR, "PyGibsonError", NULL},
+    {REPL_ERR_NOT_FOUND, "NotFoundError", NULL},
+    {REPL_ERR_NAN, "NaNError", NULL},
+    {REPL_ERR_MEM, "NoMemoryError", NULL},
+    {REPL_ERR_LOCKED, "LockedError", NULL},
+    {0xFF, NULL, NULL}
+};
+
+static PyObject * _gbBuffer2PyObject(gbBuffer buf);
+static PyObject * _get_exc(char err_code);
 
 static PyObject * cmd_set(client_obj *self, PyObject *args);
 static PyObject * cmd_mset(client_obj *self, PyObject *args);
@@ -112,6 +130,22 @@ static PyMethodDef module_methods[] = {
     {NULL}
 };
 
+static void _create_exceptions(PyObject *module) {
+    char exc_name[64];
+    gibson_exception *exc = py_exceptions;
+    sprintf(exc_name, "_pygibson.%s", exc->name);
+    PyObject *generic = PyErr_NewException(exc_name, NULL, NULL);
+    exc->exception = generic;
+    PyModule_AddObject(module, exc->name, generic);
+    exc++;
+    while (exc->name != NULL) {
+        sprintf(exc_name, "_pygibson.%s", exc->name);
+        PyObject *e = PyErr_NewException(exc_name, generic, NULL);
+        exc->exception = e;
+        PyModule_AddObject(module, exc->name, e);
+        exc++;
+    }
+}
 
 #ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
@@ -125,5 +159,6 @@ PyMODINIT_FUNC init_pygibson() {
             "_pygibson extension");
     Py_INCREF(&client_type);
     PyModule_AddObject(m, "_client", (PyObject *)&client_type);
+    _create_exceptions(m);
 }
 
