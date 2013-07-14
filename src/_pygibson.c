@@ -7,11 +7,16 @@ static PyObject * _gbBuffer2PyObject(gbBuffer buf) {
 static PyObject * _get_exc(char err_code) {
     gibson_exception *e;
     for (e = py_exceptions; e->name != NULL; e++) {
-        if (err_code == e->err_code) return e->exception;
+        if (err_code == e->err_code) return e;
     }
     PyErr_SetString(PyExc_Exception,
             "Enemies everywhere, they are stealing my exceptions!!111");
     return NULL;
+}
+
+static void pygibson_set_exception(char err_code) {
+    gibson_exception *e = _get_exc(err_code);
+    if (e != NULL) PyErr_SetString(e->exception, e->name);
 }
 
 static void
