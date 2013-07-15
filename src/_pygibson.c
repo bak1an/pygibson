@@ -1,7 +1,21 @@
 #include "_pygibson.h"
 
-static PyObject * _gbBuffer2PyObject(gbBuffer buf) {
-    return NULL;
+static PyObject * processResponse(gbBuffer *buf) {
+    switch(buf->code) {
+        case REPL_OK:
+            Py_RETURN_NONE;
+            break;
+        case REPL_VAL:
+            return NULL;
+            break;
+        case REPL_KVAL:
+            return NULL;
+            break;
+        default:
+            pygibson_set_exception(buf->code);
+            return NULL;
+            break;
+    }
 }
 
 static PyObject * _get_exc(char err_code) {

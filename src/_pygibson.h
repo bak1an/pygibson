@@ -21,7 +21,7 @@ static gibson_exception py_exceptions[] = {
     {0xFF, NULL, NULL}
 };
 
-static PyObject * _gbBuffer2PyObject(gbBuffer buf);
+static PyObject * processResponse(gbBuffer *buf);
 static PyObject * _get_exc(char err_code);
 static void pygibson_set_exception(char err_code);
 
