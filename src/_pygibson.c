@@ -4,18 +4,38 @@ static PyObject * processResponse(gbBuffer *buf) {
     switch(buf->code) {
         case REPL_OK:
             Py_RETURN_NONE;
-            break;
         case REPL_VAL:
-            return NULL;
-            break;
+            return _process_val(buf);
         case REPL_KVAL:
             return NULL;
-            break;
         default:
-            pygibson_set_exception(buf->code);
+            pygibson_set_exception(buf->code, NULL);
             return NULL;
-            break;
     }
+}
+
+static PyObject * _process_val(gbBuffer *buf) {
+    long number;
+    char *string;
+    PyObject *result;
+    switch (buf->encoding) {
+        case GB_ENC_PLAIN:
+            break;
+        case GB_ENC_NUMBER:
+            number = *(long *)buf->buffer;
+#ifdef PYGIBSON_DEBUG
+            printf("_process_val(), encoding is GB_ENC_NUMBER, number is %ld\n", number);
+#endif
+            result = PyLong_FromLong(number);
+            return result;
+        default:
+            pygibson_set_exception(REPL_ERR,
+                    "Unknown response encoding");
+            return NULL;
+   }
+}
+
+static PyObject * _process_kval(gbBuffer *buf) {
 }
 
 static PyObject * _get_exc(char err_code) {
@@ -28,9 +48,12 @@ static PyObject * _get_exc(char err_code) {
     return NULL;
 }
 
-static void pygibson_set_exception(char err_code) {
+static void pygibson_set_exception(char err_code, char *message) {
     gibson_exception *e = _get_exc(err_code);
-    if (e != NULL) PyErr_SetString(e->exception, e->name);
+    if (e != NULL) {
+        if (message == NULL) message = e->name;
+        PyErr_SetString(e->exception, message);
+    }
 }
 
 static void
