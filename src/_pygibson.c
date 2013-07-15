@@ -20,11 +20,17 @@ static PyObject * _process_val(gbBuffer *buf) {
     PyObject *result;
     switch (buf->encoding) {
         case GB_ENC_PLAIN:
-            break;
+#ifdef PYGIBSON_DEBUG
+            printf("_process_val(), encoding is GB_ENC_PLAIN, length is %d\n",
+                    buf->size);
+#endif
+            result = PyString_FromStringAndSize(buf->buffer, buf->size);
+            return result;
         case GB_ENC_NUMBER:
             number = *(long *)buf->buffer;
 #ifdef PYGIBSON_DEBUG
-            printf("_process_val(), encoding is GB_ENC_NUMBER, number is %ld\n", number);
+            printf("_process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",
+                    number);
 #endif
             result = PyLong_FromLong(number);
             return result;
