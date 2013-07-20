@@ -21,10 +21,10 @@ static gibson_exception py_exceptions[] = {
     {0xFF, NULL, NULL}
 };
 
-static PyObject * processResponse(gbBuffer *buf);
+static PyObject * process_response(gbClient *cl);
 static PyObject * _process_val(gbBuffer *buf);
-static PyObject * _process_kval(gbBuffer *buf);
-static PyObject * _get_exc(char err_code);
+static PyObject * _process_kval(gbClient *cl);
+static gibson_exception * _get_exc(char err_code);
 static void pygibson_set_exception(char err_code, char *message);
 
 static PyObject * cmd_set(client_obj *self, PyObject *args);

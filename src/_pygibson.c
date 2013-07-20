@@ -1,15 +1,15 @@
 #include "_pygibson.h"
 
-static PyObject * processResponse(gbBuffer *buf) {
-    switch(buf->code) {
+static PyObject * process_response(gbClient *cl) {
+    switch(cl->reply.code) {
         case REPL_OK:
             Py_RETURN_NONE;
         case REPL_VAL:
-            return _process_val(buf);
+            return _process_val(&cl->reply);
         case REPL_KVAL:
-            return NULL;
+            return _process_kval(cl);
         default:
-            pygibson_set_exception(buf->code, NULL);
+            pygibson_set_exception(cl->reply.code, NULL);
             return NULL;
     }
 }
@@ -41,10 +41,36 @@ static PyObject * _process_val(gbBuffer *buf) {
    }
 }
 
-static PyObject * _process_kval(gbBuffer *buf) {
+static PyObject * _process_kval(gbClient *cl) {
+#ifdef PYGIBSON_DEBUG
+    printf("_process_kval()\n");
+#endif
+    gbMultiBuffer mb;
+    int i=0;
+    PyObject *res = PyDict_New();
+    if (!res) {
+        return NULL;
+    }
+    gb_reply_multi(cl, &mb);
+    for (i=0; i<mb.count; i++) {
+#ifdef PYGIBSON_DEBUG
+        printf("key '%s' found\n", mb.keys[i]);
+#endif
+        PyObject *val = _process_val(&mb.values[i]);
+        if (val==NULL) {
+            gb_reply_multi_free(&mb);
+            return NULL;
+        }
+        if (!PyDict_SetItemString(res, mb.keys[i], val)) {
+            gb_reply_multi_free(&mb);
+            return NULL;
+        }
+    }
+    gb_reply_multi_free(&mb);
+    return res;
 }
 
-static PyObject * _get_exc(char err_code) {
+static gibson_exception * _get_exc(char err_code) {
     gibson_exception *e;
     for (e = py_exceptions; e->name != NULL; e++) {
         if (err_code == e->err_code) return e;
