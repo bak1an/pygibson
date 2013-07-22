@@ -5,6 +5,12 @@ die() {
     exit 1;
 }
 
+DEBUG="false";
+if [ "$1x" = "--debugx" ]; then  # too lazy to getopt now
+    DEBUG="true";
+    export CFLAGS="$CFLAGS -O0 -g";
+fi;
+
 python setup.py clean --all
 python setup.py build --pygibson-debug || die "build failed"
 
@@ -14,4 +20,8 @@ BUILD_DIR="build/lib.$PLATFORM-$PYTHON_VER"
 
 echo
 echo ----------------------------------------------------------------------
-PYTHONPATH=$BUILD_DIR python -m tests.run
+if [ "$DEBUG" = "false" ]; then
+    PYTHONPATH=$BUILD_DIR python -m tests.run;
+else
+    PYTHONPATH=$BUILD_DIR gdb python;
+fi;
