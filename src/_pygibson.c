@@ -22,7 +22,7 @@ static PyObject * _process_val(gbBuffer *buf) {
     switch (buf->encoding) {
         case GB_ENC_PLAIN:
 #ifdef PYGIBSON_DEBUG
-            printf("_process_val(), encoding is GB_ENC_PLAIN, length is %d\n",
+            printf("DEBUG: _process_val(), encoding is GB_ENC_PLAIN, length is %d\n",
                     buf->size);
 #endif
             result = PyString_FromStringAndSize(buf->buffer, buf->size);
@@ -30,7 +30,7 @@ static PyObject * _process_val(gbBuffer *buf) {
         case GB_ENC_NUMBER:
             number = *(long *)buf->buffer;
 #ifdef PYGIBSON_DEBUG
-            printf("_process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",
+            printf("DEBUG: _process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",
                     number);
 #endif
             result = PyLong_FromLong(number);
@@ -44,7 +44,7 @@ static PyObject * _process_val(gbBuffer *buf) {
 
 static PyObject * _process_kval(gbClient *cl) {
 #ifdef PYGIBSON_DEBUG
-    printf("_process_kval()\n");
+    printf("DEBUG: _process_kval()\n");
 #endif
     gbMultiBuffer mb;
     int i=0;
@@ -55,14 +55,14 @@ static PyObject * _process_kval(gbClient *cl) {
     gb_reply_multi(cl, &mb);
     for (i=0; i<mb.count; i++) {
 #ifdef PYGIBSON_DEBUG
-        printf("key '%s' found\n", mb.keys[i]);
+        printf("DEBUG: key '%s' found\n", mb.keys[i]);
 #endif
         PyObject *val = _process_val(&mb.values[i]);
         if (val==NULL) {
             gb_reply_multi_free(&mb);
             return NULL;
         }
-        if (!PyDict_SetItemString(res, mb.keys[i], val)) {
+        if (PyDict_SetItemString(res, mb.keys[i], val) == -1) {
             gb_reply_multi_free(&mb);
             return NULL;
         }
@@ -86,6 +86,10 @@ static void pygibson_set_exception(char err_code, char *message) {
     if (e != NULL) {
         if (message == NULL) message = e->name;
         PyErr_SetString(e->exception, message);
+#ifdef PYGIBSON_DEBUG
+        printf("DEBUG: pygibson_set_exception(): setting exception '%s', message is '%s'\n",
+                e->name, message);
+#endif
     }
 }
 
@@ -127,8 +131,15 @@ static PyObject * cmd_set(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_mset(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    char *k, *v;
+    int klen, vlen;
+    if (!PyArg_ParseTuple(args, "ss", &k, &v)) {
+        return NULL;
+    }
+    klen = strlen(k);
+    vlen = strlen(v);
+    gb_mset(&self->cl, k, klen, v, vlen);
+    return process_response(&self->cl);
 }
 
 static PyObject * cmd_ttl(client_obj *self, PyObject *args) {
@@ -153,8 +164,14 @@ static PyObject * cmd_get(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_mget(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    char *k;
+    int klen;
+    if (!PyArg_ParseTuple(args, "s", &k)) {
+        return NULL;
+    }
+    klen = strlen(k);
+    gb_mget(&self->cl, k, klen);
+    return process_response(&self->cl);
 }
 
 static PyObject * cmd_del(client_obj *self, PyObject *args) {
