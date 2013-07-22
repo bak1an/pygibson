@@ -21,7 +21,9 @@ BUILD_DIR="build/lib.$PLATFORM-$PYTHON_VER"
 echo
 echo ----------------------------------------------------------------------
 if [ "$DEBUG" = "false" ]; then
-    PYTHONPATH=$BUILD_DIR python -m tests.run;
+    PYTHONPATH=$BUILD_DIR python -m tests.run > /tmp/debug_out;
+    echo "and here is your debug from _pygibson:";
+    cat /tmp/debug_out;
 else
     PYTHONPATH=$BUILD_DIR gdb python;
 fi;

@@ -23,17 +23,17 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
     def test_mset_mget(self):
         self._cl.set("pref_key", "val", 100)
         self._cl.set("pref_koy", "val2", 100)
-        self._cl.set("preef_key", "val3", 0)
-        self._cl.mset("pref_", "opppa")
+        self._cl.set("preef_key", "val3", 100)
+        self.assertEqual(self._cl.mset("pref_", "opppa"), 2)
         self.assertEqual(self._cl.get("pref_key"), "opppa")
         self.assertEqual(self._cl.get("pref_koy"), "opppa")
         self.assertEqual(self._cl.get("preef_key"), "val3")
         mget = self._cl.mget("pre")
-        self.assertItemsEqual(mget, {
+        self.assertItemsEqual(mget.items(), {
             "pref_key": "opppa",
             "pref_koy": "opppa",
             "preef_key": "val3"
-        })
+        }.items())
         with self.assertRaises(pg.NotFoundError):
             self._cl.mget("atatatatta")
 
