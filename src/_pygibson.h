@@ -44,9 +44,7 @@ static PyObject * cmd_mlock(client_obj *self, PyObject *args);
 static PyObject * cmd_unlock(client_obj *self, PyObject *args);
 static PyObject * cmd_munlock(client_obj *self, PyObject *args);
 static PyObject * cmd_count(client_obj *self, PyObject *args);
-static PyObject * cmd_sizeof(client_obj *self, PyObject *args);
-static PyObject * cmd_msizeof(client_obj *self, PyObject *args);
-static PyObject * cmd_encof(client_obj *self, PyObject *args);
+static PyObject * cmd_meta(client_obj *self, PyObject *args);
 static PyObject * cmd_stats(client_obj *self);
 static PyObject * cmd_ping(client_obj *self);
 static PyObject * cmd_quit(client_obj *self);
@@ -69,9 +67,7 @@ static PyMethodDef client_methods[] = {
     {"mlock", (PyCFunction)cmd_mlock, METH_VARARGS, "do mlock"},
     {"munlock", (PyCFunction)cmd_munlock, METH_VARARGS, "do munlock"},
     {"count", (PyCFunction)cmd_count, METH_VARARGS, "do count"},
-    {"sizeof", (PyCFunction)cmd_sizeof, METH_VARARGS, "do sizeof"},
-    {"msizeof", (PyCFunction)cmd_msizeof, METH_VARARGS, "do msizeof"},
-    {"encof", (PyCFunction)cmd_encof, METH_VARARGS, "do encof"},
+    {"meta", (PyCFunction)cmd_meta, METH_VARARGS, "do meta"},
     {"stats", (PyCFunction)cmd_stats, METH_NOARGS, "do stats"},
     {"ping", (PyCFunction)cmd_ping, METH_NOARGS, "do ping"},
     {"quit", (PyCFunction)cmd_quit, METH_NOARGS, "do quit"},

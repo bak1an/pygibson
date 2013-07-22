@@ -229,17 +229,7 @@ static PyObject * cmd_count(client_obj *self, PyObject *args) {
     return NULL;
 }
 
-static PyObject * cmd_sizeof(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
-}
-
-static PyObject * cmd_msizeof(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
-}
-
-static PyObject * cmd_encof(client_obj *self, PyObject *args) {
+static PyObject * cmd_meta(client_obj *self, PyObject *args) {
     PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
     return NULL;
 }
