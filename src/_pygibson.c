@@ -1,4 +1,5 @@
 #include "_pygibson.h"
+#include <string.h>
 
 static PyObject * process_response(gbClient *cl) {
     switch(cl->reply.code) {
@@ -114,8 +115,15 @@ client_init(client_obj *self, PyObject *args, PyObject *kwds) {
 }
 
 static PyObject * cmd_set(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    char *k, *v;
+    int klen, vlen, ttl;
+    if (!PyArg_ParseTuple(args, "ssI", &k, &v, &ttl)) {
+        return NULL;
+    }
+    klen = strlen(k);
+    vlen = strlen(v);
+    gb_set(&self->cl, k, klen, v, vlen, ttl);
+    return process_response(&self->cl);
 }
 
 static PyObject * cmd_mset(client_obj *self, PyObject *args) {
@@ -134,8 +142,14 @@ static PyObject * cmd_mttl(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_get(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    char *k;
+    int klen;
+    if (!PyArg_ParseTuple(args, "s", &k)) {
+        return NULL;
+    }
+    klen = strlen(k);
+    gb_get(&self->cl, k, klen);
+    return process_response(&self->cl);
 }
 
 static PyObject * cmd_mget(client_obj *self, PyObject *args) {
@@ -220,11 +234,8 @@ static PyObject * cmd_stats(client_obj *self) {
 }
 
 static PyObject * cmd_ping(client_obj *self) {
-    int ret = gb_ping(&self->cl);
-    if (ret) {
-        Py_RETURN_FALSE;
-    }
-    Py_RETURN_TRUE;
+    gb_ping(&self->cl);
+    return process_response(&self->cl);
 }
 
 static PyObject * cmd_quit(client_obj *self) {
