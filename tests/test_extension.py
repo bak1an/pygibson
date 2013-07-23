@@ -37,3 +37,23 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         with self.assertRaises(pg.NotFoundError):
             self._cl.mget("atatatatta")
 
+    def test_ttl_mttl(self):
+        self._cl.set("ttl", "val", 1000)
+        time.sleep(3)
+        self.assertEqual(self._cl.get("ttl"), "val")
+        self._cl.ttl("ttl", 2)
+        time.sleep(3)
+        with self.assertRaises(pg.NotFoundError):
+            self._cl.get("ttl")
+        self._cl.set("TTL1", "val1", 1000)
+        self._cl.set("TTL2", "val2", 1000)
+        time.sleep(3)
+        self.assertEqual(self._cl.get("TTL1"), "val1")
+        self.assertEqual(self._cl.get("TTL2"), "val2")
+        self.assertEqual(self._cl.mttl("TTL", 2), 2)
+        time.sleep(3)
+        with self.assertRaises(pg.NotFoundError):
+            self._cl.get("TTL1")
+        with self.assertRaises(pg.NotFoundError):
+            self._cl.get("TTL2")
+

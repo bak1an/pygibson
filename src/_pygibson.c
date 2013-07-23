@@ -118,6 +118,34 @@ client_init(client_obj *self, PyObject *args, PyObject *kwds) {
     return 0;
 }
 
+// Generic commands:
+static PyObject *
+_generic_key_ttl_cmd(client_obj *self, PyObject *args, fp_gb_key_ttl gb_f) {
+    char *k;
+    int klen, ttl;
+    if (!PyArg_ParseTuple(args, "sI", &k, &ttl)) {
+        return NULL;
+    }
+    klen = strlen(k);
+    gb_f(&self->cl, k, klen, ttl);
+    return process_response(&self->cl);
+}
+
+static PyObject *
+_generic_key_cmd(client_obj *self, PyObject *args, fp_gb_key gb_f) {
+    char *k;
+    int klen;
+    if (!PyArg_ParseTuple(args, "s", &k)) {
+        return NULL;
+    }
+    klen = strlen(k);
+    gb_f(&self->cl, k, klen);
+    return process_response(&self->cl);
+}
+// ^^^^^^^^^^^^^^^^
+// Generic commands
+// ^^^^^^^^^^^^^^^^
+
 static PyObject * cmd_set(client_obj *self, PyObject *args) {
     char *k, *v;
     int klen, vlen, ttl;
@@ -143,35 +171,19 @@ static PyObject * cmd_mset(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_ttl(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_ttl_cmd(self, args, gb_ttl);
 }
 
 static PyObject * cmd_mttl(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_ttl_cmd(self, args, gb_mttl);
 }
 
 static PyObject * cmd_get(client_obj *self, PyObject *args) {
-    char *k;
-    int klen;
-    if (!PyArg_ParseTuple(args, "s", &k)) {
-        return NULL;
-    }
-    klen = strlen(k);
-    gb_get(&self->cl, k, klen);
-    return process_response(&self->cl);
+    return _generic_key_cmd(self, args, gb_get);
 }
 
 static PyObject * cmd_mget(client_obj *self, PyObject *args) {
-    char *k;
-    int klen;
-    if (!PyArg_ParseTuple(args, "s", &k)) {
-        return NULL;
-    }
-    klen = strlen(k);
-    gb_mget(&self->cl, k, klen);
-    return process_response(&self->cl);
+    return _generic_key_cmd(self, args, gb_mget);
 }
 
 static PyObject * cmd_del(client_obj *self, PyObject *args) {
