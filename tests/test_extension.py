@@ -15,6 +15,10 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         with self.assertRaises(pg.NotFoundError):
             f()
 
+    def wait_locked(self, f):
+        with self.assertRaises(pg.LockedError):
+            f()
+
     def test_ping(self):
         self.assertTrue(self._cl.ping() is None)
 
@@ -124,3 +128,34 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertTrue(isinstance(stats, dict))
         for k in keys:
             self.assertTrue(k in stats)
+        self.assertEqual(len(keys), len(stats.keys()))
+
+    def test_locks(self):
+        try:
+            # cleanup
+            self._cl.munlock("lock")
+        except pg.NotFoundError:
+            pass
+        self._cl.set("lock", "val", 600)
+        self._cl.lock("lock", 2)
+        self.wait_locked(lambda: self._cl.set("lock", "val2", 600))
+        self.assertEqual(self._cl.get("lock"), "val")
+        time.sleep(3)
+        self._cl.set("lock", "val2", 600)
+        self.assertEqual(self._cl.get("lock"), "val2")
+        self._cl.set("lock_num", "100500", 600)
+        self._cl.set("lock_num2", "500100", 600)
+        self._cl.set("lock_num3", "1", 600)
+        self.assertEqual(self._cl.mlock("lock_num", 600), 3)
+        self.wait_locked(lambda: self._cl.inc("lock_num"))
+        self.wait_locked(lambda: self._cl.dec("lock_num2"))
+        self.wait_404(lambda: self._cl.mdec("lock_num"))
+        self.wait_404(lambda: self._cl.minc("lock_num"))
+        self._cl.unlock("lock_num")
+        self.assertEqual(self._cl.minc("lock_num"), 1)
+        self.assertEqual(self._cl.inc("lock_num"), 100502)
+        self.wait_locked(lambda: self._cl.dec("lock_num2"))
+        self.wait_locked(lambda: self._cl.dec("lock_num3"))
+        self.assertEqual(self._cl.munlock("lock_num"), 3)  # should not 2 be here?
+        self.assertEqual(self._cl.minc("lock_num"), 3)
+

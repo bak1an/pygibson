@@ -214,23 +214,19 @@ static PyObject * cmd_dec(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_lock(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_ttl_cmd(self, args, gb_lock);
 }
 
 static PyObject * cmd_mlock(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_ttl_cmd(self, args, gb_mlock);
 }
 
 static PyObject * cmd_unlock(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_unlock);
 }
 
 static PyObject * cmd_munlock(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_munlock);
 }
 
 static PyObject * cmd_count(client_obj *self, PyObject *args) {
