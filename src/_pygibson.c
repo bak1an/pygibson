@@ -234,8 +234,15 @@ static PyObject * cmd_count(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_meta(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    char *key, *meta;
+    int klen, mlen;
+    if (!PyArg_ParseTuple(args, "ss", &key, &meta)) {
+        return NULL;
+    }
+    klen = strlen(key);
+    mlen = strlen(meta);
+    gb_meta(&self->cl, key, klen, meta, mlen);
+    return process_response(&self->cl);
 }
 
 static PyObject * cmd_stats(client_obj *self) {
@@ -249,8 +256,8 @@ static PyObject * cmd_ping(client_obj *self) {
 }
 
 static PyObject * cmd_quit(client_obj *self) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    gb_quit(&self->cl);
+    return process_response(&self->cl);
 }
 
 static void _create_exceptions(PyObject *module) {

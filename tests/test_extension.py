@@ -173,3 +173,19 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertEqual(self._cl.count("count"), 3)
         # well, counting up to 3 is ok for me
 
+    def test_quit(self):
+        some_client = pg._client()
+        self.assertIsNone(some_client.ping())
+        self.assertIsNone(some_client.quit())
+        # silly test
+
+    def test_meta(self):
+        allowed_meta = [
+            "size", "encoding", "access", "created",
+            "ttl", "left", "lock"
+        ]
+        self._cl.set("meta", "val", 123)
+        for m in allowed_meta:
+            res = self._cl.meta("meta", m)
+            self.assertFalse(res is None)
+
