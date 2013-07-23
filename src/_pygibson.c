@@ -17,7 +17,6 @@ static PyObject * process_response(gbClient *cl) {
 
 static PyObject * _process_val(gbBuffer *buf) {
     long number;
-    char *string;
     PyObject *result;
     switch (buf->encoding) {
         case GB_ENC_PLAIN:
@@ -25,10 +24,11 @@ static PyObject * _process_val(gbBuffer *buf) {
             printf("DEBUG: _process_val(), encoding is GB_ENC_PLAIN, length is %d\n",
                     buf->size);
 #endif
-            result = PyString_FromStringAndSize(buf->buffer, buf->size);
+            result = PyString_FromStringAndSize((char *)buf->buffer,
+                    buf->size);
             return result;
         case GB_ENC_NUMBER:
-            number = *(long *)buf->buffer;
+            number = gb_reply_number(buf);
 #ifdef PYGIBSON_DEBUG
             printf("DEBUG: _process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",
                     number);
@@ -244,9 +244,8 @@ static PyObject * cmd_meta(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_stats(client_obj *self) {
-    gbClient *cl = &self->cl;
-    int ret = gb_stats(cl);
-    Py_RETURN_NONE;
+    gb_stats(&self->cl);
+    return process_response(&self->cl);
 }
 
 static PyObject * cmd_ping(client_obj *self) {
