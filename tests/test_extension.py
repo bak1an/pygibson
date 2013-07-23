@@ -159,3 +159,17 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertEqual(self._cl.munlock("lock_num"), 3)  # should not 2 be here?
         self.assertEqual(self._cl.minc("lock_num"), 3)
 
+    def test_count(self):
+        try:
+            # cleanup
+            self._cl.mdl("count")
+        except pg.NotFoundError:
+            pass
+        self._cl.set("count", "val", 600)
+        self.assertEqual(self._cl.count("count"), 1)
+        self._cl.set("count2", "val2", 600)
+        self.assertEqual(self._cl.count("count"), 2)
+        self._cl.set("count3", "val3", 600)
+        self.assertEqual(self._cl.count("count"), 3)
+        # well, counting up to 3 is ok for me
+

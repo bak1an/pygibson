@@ -230,8 +230,7 @@ static PyObject * cmd_munlock(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_count(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_count);
 }
 
 static PyObject * cmd_meta(client_obj *self, PyObject *args) {
