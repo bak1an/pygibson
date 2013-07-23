@@ -198,23 +198,19 @@ static PyObject * cmd_mdel(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_inc(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_inc);
 }
 
 static PyObject * cmd_minc(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_minc);
 }
 
 static PyObject * cmd_mdec(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_mdec);
 }
 
 static PyObject * cmd_dec(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_dec);
 }
 
 static PyObject * cmd_lock(client_obj *self, PyObject *args) {
