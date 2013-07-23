@@ -259,3 +259,35 @@ static PyObject * cmd_quit(client_obj *self) {
     return NULL;
 }
 
+static void _create_exceptions(PyObject *module) {
+    char exc_name[64];
+    gibson_exception *exc = py_exceptions;
+    sprintf(exc_name, "_pygibson.%s", exc->name);
+    PyObject *generic = PyErr_NewException(exc_name, NULL, NULL);
+    exc->exception = generic;
+    PyModule_AddObject(module, exc->name, generic);
+    exc++;
+    while (exc->name != NULL) {
+        sprintf(exc_name, "_pygibson.%s", exc->name);
+        PyObject *e = PyErr_NewException(exc_name, generic, NULL);
+        exc->exception = e;
+        PyModule_AddObject(module, exc->name, e);
+        exc++;
+    }
+}
+
+#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
+#define PyMODINIT_FUNC void
+#endif
+PyMODINIT_FUNC init_pygibson() {
+    PyObject *m;
+    if (PyType_Ready(&client_type) < 0) {
+        return;
+    }
+    m = Py_InitModule3("_pygibson", module_methods,
+            "_pygibson extension");
+    Py_INCREF(&client_type);
+    PyModule_AddObject(m, "_client", (PyObject *)&client_type);
+    _create_exceptions(m);
+}
+
