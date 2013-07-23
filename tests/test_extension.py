@@ -53,7 +53,19 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertEqual(self._cl.mttl("TTL", 2), 2)
         time.sleep(3)
         with self.assertRaises(pg.NotFoundError):
-            self._cl.get("TTL1")
+            self._cl.mget("TTL")
+
+    def test_del_mdel(self):
+        self._cl.set("del", "val", 1000)
+        self.assertEqual(self._cl.get("del"), "val")
+        self.assertIsNone(self._cl.dl("del"))
         with self.assertRaises(pg.NotFoundError):
-            self._cl.get("TTL2")
+            self._cl.get("del")
+        self._cl.set("DEL1", "val1", 1000)
+        self._cl.set("DEL2", "val2", 1000)
+        self.assertEqual(self._cl.get("DEL1"), "val1")
+        self.assertEqual(self._cl.get("DEL2"), "val2")
+        self.assertEqual(self._cl.mdl("DEL"), 2)
+        with self.assertRaises(pg.NotFoundError):
+            self._cl.mget("DEL")
 

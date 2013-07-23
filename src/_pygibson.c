@@ -119,6 +119,8 @@ client_init(client_obj *self, PyObject *args, PyObject *kwds) {
 }
 
 // Generic commands:
+
+// generic command that requires key and ttl
 static PyObject *
 _generic_key_ttl_cmd(client_obj *self, PyObject *args, fp_gb_key_ttl gb_f) {
     char *k;
@@ -131,6 +133,7 @@ _generic_key_ttl_cmd(client_obj *self, PyObject *args, fp_gb_key_ttl gb_f) {
     return process_response(&self->cl);
 }
 
+// generic command that requires only key
 static PyObject *
 _generic_key_cmd(client_obj *self, PyObject *args, fp_gb_key gb_f) {
     char *k;
@@ -187,13 +190,11 @@ static PyObject * cmd_mget(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_del(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_del);
 }
 
 static PyObject * cmd_mdel(client_obj *self, PyObject *args) {
-    PyErr_SetString(PyExc_NotImplementedError, "not implemented yet");
-    return NULL;
+    return _generic_key_cmd(self, args, gb_mdel);
 }
 
 static PyObject * cmd_inc(client_obj *self, PyObject *args) {
