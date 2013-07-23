@@ -1,0 +1,3 @@
+[submodule "src/libgibsonclient"]
+	path = src/libgibsonclient
+	url = https://github.com/evilsocket/libgibsonclient.git
