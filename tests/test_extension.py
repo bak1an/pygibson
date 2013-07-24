@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import time
 
 from . import unittest
@@ -13,6 +15,10 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
 
     def wait_404(self, f):
         with self.assertRaises(pg.NotFoundError):
+            f()
+
+    def wait_locked(self, f):
+        with self.assertRaises(pg.LockedError):
             f()
 
     def test_ping(self):
@@ -124,3 +130,86 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertTrue(isinstance(stats, dict))
         for k in keys:
             self.assertTrue(k in stats)
+        self.assertEqual(len(keys), len(stats.keys()))
+
+    def test_locks(self):
+        try:
+            # cleanup
+            self._cl.munlock("lock")
+        except pg.NotFoundError:
+            pass
+        self._cl.set("lock", "val", 600)
+        self._cl.lock("lock", 2)
+        self.wait_locked(lambda: self._cl.set("lock", "val2", 600))
+        self.assertEqual(self._cl.get("lock"), "val")
+        time.sleep(3)
+        self._cl.set("lock", "val2", 600)
+        self.assertEqual(self._cl.get("lock"), "val2")
+        self._cl.set("lock_num", "100500", 600)
+        self._cl.set("lock_num2", "500100", 600)
+        self._cl.set("lock_num3", "1", 600)
+        self.assertEqual(self._cl.mlock("lock_num", 600), 3)
+        self.wait_locked(lambda: self._cl.inc("lock_num"))
+        self.wait_locked(lambda: self._cl.dec("lock_num2"))
+        self.wait_404(lambda: self._cl.mdec("lock_num"))
+        self.wait_404(lambda: self._cl.minc("lock_num"))
+        self._cl.unlock("lock_num")
+        self.assertEqual(self._cl.minc("lock_num"), 1)
+        self.assertEqual(self._cl.inc("lock_num"), 100502)
+        self.wait_locked(lambda: self._cl.dec("lock_num2"))
+        self.wait_locked(lambda: self._cl.dec("lock_num3"))
+        self.assertEqual(self._cl.munlock("lock_num"), 3)  # should not 2 be here?
+        self.assertEqual(self._cl.minc("lock_num"), 3)
+
+    def test_count(self):
+        try:
+            # cleanup
+            self._cl.mdl("count")
+        except pg.NotFoundError:
+            pass
+        self._cl.set("count", "val", 600)
+        self.assertEqual(self._cl.count("count"), 1)
+        self._cl.set("count2", "val2", 600)
+        self.assertEqual(self._cl.count("count"), 2)
+        self._cl.set("count3", "val3", 600)
+        self.assertEqual(self._cl.count("count"), 3)
+        # well, counting up to 3 is ok for me
+
+    def test_quit(self):
+        some_client = pg._client()
+        self.assertIsNone(some_client.ping())
+        self.assertIsNone(some_client.quit())
+        # silly test
+
+    def test_meta(self):
+        allowed_meta = [
+            "size", "encoding", "access", "created",
+            "ttl", "left", "lock"
+        ]
+        self._cl.set("meta", "val", 123)
+        for m in allowed_meta:
+            res = self._cl.meta("meta", m)
+            self.assertFalse(res is None)
+        self.wait_404(lambda: self._cl.meta("qwerty", "size"))
+        with self.assertRaises(pg.PyGibsonError):
+            self._cl.meta("meta", "whatsup")
+
+    def test_keys(self):
+        self._cl.set("KEYS1", "val", 600)
+        self._cl.set("KEYS2", "val1", 600)
+        self._cl.set("KEYS3", "val2", 600)
+        self.assertItemsEqual(self._cl.keys("KEY").items(), {
+            "0": "KEYS1",
+            "1": "KEYS2",
+            "2": "KEYS3"
+        }.items())
+
+    def test_bin_data(self):
+        data = '\xfd\xbb{\xbc\xfa[\xe5\xfatI#\x00\xdbE;\x89A@\xc8)'
+        key = u'Водка'.encode('utf-8')
+        self._cl.set("BIN1", data, 600)
+        self._cl.set(key, "atata", 600)
+        self.assertEqual(self._cl.get("BIN1"), data)
+        self.assertEqual(self._cl.get(key), "atata")
+        self.assertEqual(self._cl.mget(key).items(), [(key, 'atata')])
+
