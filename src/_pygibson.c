@@ -1,5 +1,11 @@
 #include "_pygibson.h"
 
+#ifdef PYGIBSON_DEBUG
+#   define DBG printf
+#else
+#   define DBG(f,...) // x  
+#endif
+
 static PyObject * process_response(gbClient *cl) {
     switch(cl->reply.code) {
         case REPL_OK:
@@ -19,19 +25,16 @@ static PyObject * _process_val(gbBuffer *buf) {
     PyObject *result;
     switch (buf->encoding) {
         case GB_ENC_PLAIN:
-#ifdef PYGIBSON_DEBUG
-            printf("DEBUG: _process_val(), encoding is GB_ENC_PLAIN, length is %d\n",
-                    buf->size);
-#endif
+            DBG("DEBUG: _process_val(), encoding is GB_ENC_PLAIN, length is %d\n",buf->size);
+            
             result = PyString_FromStringAndSize((char *)buf->buffer,
                     buf->size);
             return result;
         case GB_ENC_NUMBER:
             number = gb_reply_number(buf);
-#ifdef PYGIBSON_DEBUG
-            printf("DEBUG: _process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",
-                    number);
-#endif
+            
+            DBG("DEBUG: _process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",number);
+            
             result = PyLong_FromLong(number);
             return result;
         default:
@@ -42,9 +45,8 @@ static PyObject * _process_val(gbBuffer *buf) {
 }
 
 static PyObject * _process_kval(gbClient *cl) {
-#ifdef PYGIBSON_DEBUG
-    printf("DEBUG: _process_kval()\n");
-#endif
+    DBG("DEBUG: _process_kval()\n");
+    
     gbMultiBuffer mb;
     int i=0;
     PyObject *res = PyDict_New();
@@ -53,9 +55,8 @@ static PyObject * _process_kval(gbClient *cl) {
     }
     gb_reply_multi(cl, &mb);
     for (i=0; i<mb.count; i++) {
-#ifdef PYGIBSON_DEBUG
-        printf("DEBUG: key '%s' found\n", mb.keys[i]);
-#endif
+        DBG("DEBUG: key '%s' found\n", mb.keys[i]);
+
         PyObject *val = _process_val(&mb.values[i]);
         if (val==NULL) {
             gb_reply_multi_free(&mb);
@@ -85,10 +86,8 @@ static void pygibson_set_exception(char err_code, char *message) {
     if (e != NULL) {
         if (message == NULL) message = e->name;
         PyErr_SetString(e->exception, message);
-#ifdef PYGIBSON_DEBUG
-        printf("DEBUG: pygibson_set_exception(): setting exception '%s', message is '%s'\n",
-                e->name, message);
-#endif
+        
+        DBG("DEBUG: pygibson_set_exception(): setting exception '%s', message is '%s'\n",e->name, message);
     }
 }
 
@@ -112,10 +111,9 @@ static int
 client_init(client_obj *self, PyObject *args, PyObject *kwds) {
     int connect = gb_tcp_connect(&self->cl,
             NULL, 0, 3600);
-#ifdef PYGIBSON_DEBUG
-    printf("DEBUG: gb_tcp_connect(): %d\n", connect);
-#endif
-    return 0;
+    DBG("DEBUG: gb_tcp_connect(): %d\n", connect);
+    
+    return connect;
 }
 
 // Generic commands:
