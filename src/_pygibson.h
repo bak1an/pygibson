@@ -55,6 +55,7 @@ static PyObject * cmd_unlock(client_obj *self, PyObject *args);
 static PyObject * cmd_munlock(client_obj *self, PyObject *args);
 static PyObject * cmd_count(client_obj *self, PyObject *args);
 static PyObject * cmd_meta(client_obj *self, PyObject *args);
+static PyObject * cmd_keys(client_obj *self, PyObject *args);
 static PyObject * cmd_stats(client_obj *self);
 static PyObject * cmd_ping(client_obj *self);
 static PyObject * cmd_quit(client_obj *self);
@@ -80,6 +81,7 @@ static PyMethodDef client_methods[] = {
     {"munlock", (PyCFunction)cmd_munlock, METH_VARARGS, "do munlock"},
     {"count", (PyCFunction)cmd_count, METH_VARARGS, "do count"},
     {"meta", (PyCFunction)cmd_meta, METH_VARARGS, "do meta"},
+    {"keys", (PyCFunction)cmd_keys, METH_VARARGS, "do keys"},
     {"stats", (PyCFunction)cmd_stats, METH_NOARGS, "do stats"},
     {"ping", (PyCFunction)cmd_ping, METH_NOARGS, "do ping"},
     {"quit", (PyCFunction)cmd_quit, METH_NOARGS, "do quit"},

@@ -188,4 +188,17 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         for m in allowed_meta:
             res = self._cl.meta("meta", m)
             self.assertFalse(res is None)
+        self.wait_404(lambda: self._cl.meta("qwerty", "size"))
+        with self.assertRaises(pg.PyGibsonError):
+            self._cl.meta("meta", "whatsup")
+
+    def test_keys(self):
+        self._cl.set("KEYS1", "val", 600)
+        self._cl.set("KEYS2", "val1", 600)
+        self._cl.set("KEYS3", "val2", 600)
+        self.assertItemsEqual(self._cl.keys("KEY").items(), {
+            "0": "KEYS1",
+            "1": "KEYS2",
+            "2": "KEYS3"
+        }.items())
 

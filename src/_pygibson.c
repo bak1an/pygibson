@@ -233,6 +233,10 @@ static PyObject * cmd_count(client_obj *self, PyObject *args) {
     return _generic_key_cmd(self, args, gb_count);
 }
 
+static PyObject * cmd_keys(client_obj *self, PyObject *args) {
+    return _generic_key_cmd(self, args, gb_keys);
+}
+
 static PyObject * cmd_meta(client_obj *self, PyObject *args) {
     char *key, *meta;
     int klen, mlen;
