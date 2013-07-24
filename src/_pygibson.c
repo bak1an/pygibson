@@ -76,6 +76,7 @@ static gibson_exception * _get_exc(char err_code) {
     for (e = py_exceptions; e->name != NULL; e++) {
         if (err_code == e->err_code) return e;
     }
+    // What about gb_getlasterror here ?
     PyErr_SetString(PyExc_Exception,
             "Enemies everywhere, they are stealing my exceptions!!111");
     return NULL;
