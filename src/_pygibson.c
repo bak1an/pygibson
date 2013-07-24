@@ -1,5 +1,4 @@
 #include "_pygibson.h"
-#include <string.h>
 
 static PyObject * process_response(gbClient *cl) {
     switch(cl->reply.code) {
@@ -95,6 +94,7 @@ static void pygibson_set_exception(char err_code, char *message) {
 
 static void
 client_dealloc(client_obj *self) {
+    //BTW, there is a memory leak here
     self->ob_type->tp_free((PyObject *)self);
 }
 
@@ -125,10 +125,9 @@ static PyObject *
 _generic_key_ttl_cmd(client_obj *self, PyObject *args, fp_gb_key_ttl gb_f) {
     char *k;
     int klen, ttl;
-    if (!PyArg_ParseTuple(args, "sI", &k, &ttl)) {
+    if (!PyArg_ParseTuple(args, "s#I", &k, &klen, &ttl)) {
         return NULL;
     }
-    klen = strlen(k);
     gb_f(&self->cl, k, klen, ttl);
     return process_response(&self->cl);
 }
@@ -138,10 +137,9 @@ static PyObject *
 _generic_key_cmd(client_obj *self, PyObject *args, fp_gb_key gb_f) {
     char *k;
     int klen;
-    if (!PyArg_ParseTuple(args, "s", &k)) {
+    if (!PyArg_ParseTuple(args, "s#", &k, &klen)) {
         return NULL;
     }
-    klen = strlen(k);
     gb_f(&self->cl, k, klen);
     return process_response(&self->cl);
 }
@@ -152,11 +150,9 @@ _generic_key_cmd(client_obj *self, PyObject *args, fp_gb_key gb_f) {
 static PyObject * cmd_set(client_obj *self, PyObject *args) {
     char *k, *v;
     int klen, vlen, ttl;
-    if (!PyArg_ParseTuple(args, "ssI", &k, &v, &ttl)) {
+    if (!PyArg_ParseTuple(args, "s#s#I", &k, &klen, &v, &vlen, &ttl)) {
         return NULL;
     }
-    klen = strlen(k);
-    vlen = strlen(v);
     gb_set(&self->cl, k, klen, v, vlen, ttl);
     return process_response(&self->cl);
 }
@@ -164,11 +160,9 @@ static PyObject * cmd_set(client_obj *self, PyObject *args) {
 static PyObject * cmd_mset(client_obj *self, PyObject *args) {
     char *k, *v;
     int klen, vlen;
-    if (!PyArg_ParseTuple(args, "ss", &k, &v)) {
+    if (!PyArg_ParseTuple(args, "s#s#", &k, &klen, &v, &vlen)) {
         return NULL;
     }
-    klen = strlen(k);
-    vlen = strlen(v);
     gb_mset(&self->cl, k, klen, v, vlen);
     return process_response(&self->cl);
 }
@@ -240,11 +234,9 @@ static PyObject * cmd_keys(client_obj *self, PyObject *args) {
 static PyObject * cmd_meta(client_obj *self, PyObject *args) {
     char *key, *meta;
     int klen, mlen;
-    if (!PyArg_ParseTuple(args, "ss", &key, &meta)) {
+    if (!PyArg_ParseTuple(args, "s#s#", &key, &klen, &meta, &mlen)) {
         return NULL;
     }
-    klen = strlen(key);
-    mlen = strlen(meta);
     gb_meta(&self->cl, key, klen, meta, mlen);
     return process_response(&self->cl);
 }

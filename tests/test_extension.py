@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import time
 
 from . import unittest
@@ -201,4 +203,13 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
             "1": "KEYS2",
             "2": "KEYS3"
         }.items())
+
+    def test_bin_data(self):
+        data = '\xfd\xbb{\xbc\xfa[\xe5\xfatI#\x00\xdbE;\x89A@\xc8)'
+        key = u'Водка'.encode('utf-8')
+        self._cl.set("BIN1", data, 600)
+        self._cl.set(key, "atata", 600)
+        self.assertEqual(self._cl.get("BIN1"), data)
+        self.assertEqual(self._cl.get(key), "atata")
+        self.assertEqual(self._cl.mget(key).items(), [(key, 'atata')])
 
