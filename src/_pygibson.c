@@ -94,7 +94,8 @@ static void pygibson_set_exception(char err_code, char *message) {
 
 static void
 client_dealloc(client_obj *self) {
-    //BTW, there is a memory leak here
+    free(self->cl.reply.buffer);
+    free(self->cl.request.buffer);
     self->ob_type->tp_free((PyObject *)self);
 }
 
@@ -105,6 +106,8 @@ client_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     if (self == NULL) {
         return NULL;
     }
+    self->cl.reply.buffer = NULL;
+    self->cl.request.buffer = NULL;
     return (PyObject *)self;
 }
 
