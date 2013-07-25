@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import os
 import pygibson
 
 from . import unittest
@@ -229,4 +230,9 @@ class TestClient(unittest.TestCase):
         keys = c.keys("KEY")
         self.assertTrue(isinstance(keys, list))
         self.assertItemsEqual(keys, ["KEYS1", "KEYS2", "KEYS3"])
+
+    def test_exceptions(self):
+        c = pygibson.Client()
+        with self.assertRaises(pygibson.NotFoundError):
+            c.mget(os.urandom(128))
 
