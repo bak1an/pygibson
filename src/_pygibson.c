@@ -3,7 +3,7 @@
 #ifdef PYGIBSON_DEBUG
 #   define DBG printf
 #else
-#   define DBG(f,...) // x  
+#   define DBG(f,...) // x
 #endif
 
 static PyObject * process_response(gbClient *cl) {
@@ -26,15 +26,15 @@ static PyObject * _process_val(gbBuffer *buf) {
     switch (buf->encoding) {
         case GB_ENC_PLAIN:
             DBG("DEBUG: _process_val(), encoding is GB_ENC_PLAIN, length is %d\n",buf->size);
-            
+
             result = PyString_FromStringAndSize((char *)buf->buffer,
                     buf->size);
             return result;
         case GB_ENC_NUMBER:
             number = gb_reply_number(buf);
-            
+
             DBG("DEBUG: _process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",number);
-            
+
             result = PyLong_FromLong(number);
             return result;
         default:
@@ -46,7 +46,7 @@ static PyObject * _process_val(gbBuffer *buf) {
 
 static PyObject * _process_kval(gbClient *cl) {
     DBG("DEBUG: _process_kval()\n");
-    
+
     gbMultiBuffer mb;
     int i=0;
     PyObject *res = PyDict_New();
@@ -87,7 +87,7 @@ static void pygibson_set_exception(char err_code, char *message) {
     if (e != NULL) {
         if (message == NULL) message = e->name;
         PyErr_SetString(e->exception, message);
-        
+
         DBG("DEBUG: pygibson_set_exception(): setting exception '%s', message is '%s'\n",e->name, message);
     }
 }
@@ -113,7 +113,7 @@ client_init(client_obj *self, PyObject *args, PyObject *kwds) {
     int connect = gb_tcp_connect(&self->cl,
             NULL, 0, 3600);
     DBG("DEBUG: gb_tcp_connect(): %d\n", connect);
-    
+
     return connect;
 }
 
