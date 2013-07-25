@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import pygibson
 
 from . import unittest
 from . import PyGibsonBaseTest
@@ -212,4 +213,20 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertEqual(self._cl.get("BIN1"), data)
         self.assertEqual(self._cl.get(key), "atata")
         self.assertEqual(self._cl.mget(key).items(), [(key, 'atata')])
+
+
+class TestClient(unittest.TestCase):
+    def test_default_ttl(self):
+        c = pygibson.Client()
+        c.set("client_ttl", "val")
+        self.assertEqual(c.meta("client_ttl", "ttl"), -1)
+
+    def test_keys(self):
+        c = pygibson.Client()
+        c.set("KEYS1", "val", 600)
+        c.set("KEYS2", "val1", 600)
+        c.set("KEYS3", "val2", 600)
+        keys = c.keys("KEY")
+        self.assertTrue(isinstance(keys, list))
+        self.assertItemsEqual(keys, ["KEYS1", "KEYS2", "KEYS3"])
 
