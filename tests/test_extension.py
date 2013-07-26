@@ -6,9 +6,11 @@ import pygibson
 
 from . import unittest
 from . import PyGibsonBaseTest
+from . import ServerSpawningTestCase
 from . import _pygibson as pg
 
 
+@unittest.skip("Test suite is under refactoring")
 class PyGibsonExtensionTest(PyGibsonBaseTest):
 
     def wait_nan(self, f):
@@ -216,6 +218,7 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertEqual(self._cl.mget(key).items(), [(key, 'atata')])
 
 
+@unittest.skip("Test suite is under refactoring")
 class TestClient(unittest.TestCase):
     def test_default_ttl(self):
         c = pygibson.Client()
@@ -236,3 +239,11 @@ class TestClient(unittest.TestCase):
         with self.assertRaises(pygibson.NotFoundError):
             c.mget(os.urandom(128))
 
+
+class TestUnixSockets(ServerSpawningTestCase):
+    def __init__(self, *args, **kwargs):
+        self.config_name = "unix_sockets.conf"
+        super(TestUnixSockets, self).__init__(*args, **kwargs)
+
+    def test_nothing(self):
+        print "nothing tested successfully"
