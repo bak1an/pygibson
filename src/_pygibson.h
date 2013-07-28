@@ -23,6 +23,7 @@ static gibson_exception py_exceptions[] = {
 
 typedef int (*fp_gb_key_ttl)(gbClient *, char *, int,  int);
 typedef int (*fp_gb_key)(gbClient *, char *, int);
+typedef int (*fp_gb_noargs)(gbClient *);
 
 // generic command that requires key and ttl
 static PyObject * _generic_key_ttl_cmd(client_obj *self, PyObject *args,
@@ -30,6 +31,8 @@ static PyObject * _generic_key_ttl_cmd(client_obj *self, PyObject *args,
 // generic command that requires only key
 static PyObject * _generic_key_cmd(client_obj *self, PyObject *args,
         fp_gb_key gb_f);
+// generic no args command
+static PyObject * _generic_noargs_cmd(client_obj *self, fp_gb_noargs gb_f);
 
 static PyObject * process_response(gbClient *cl);
 static PyObject * _process_val(gbBuffer *buf);

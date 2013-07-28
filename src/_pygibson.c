@@ -156,6 +156,17 @@ _generic_key_cmd(client_obj *self, PyObject *args, fp_gb_key gb_f) {
     }
     return process_response(&self->cl);
 }
+
+static PyObject *
+_generic_noargs_cmd(client_obj *self, fp_gb_noargs gb_f) {
+    int res = gb_f(&self->cl);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
+    return process_response(&self->cl);
+}
 // ^^^^^^^^^^^^^^^^
 // Generic commands
 // ^^^^^^^^^^^^^^^^
@@ -270,33 +281,15 @@ static PyObject * cmd_meta(client_obj *self, PyObject *args) {
 }
 
 static PyObject * cmd_stats(client_obj *self) {
-    int res = gb_stats(&self->cl);
-    if (res != 0) {
-        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
-        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
-        return NULL;
-    }
-    return process_response(&self->cl);
+    return _generic_noargs_cmd(self, gb_stats);
 }
 
 static PyObject * cmd_ping(client_obj *self) {
-    int res = gb_ping(&self->cl);
-    if (res != 0) {
-        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
-        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
-        return NULL;
-    }
-    return process_response(&self->cl);
+    return _generic_noargs_cmd(self, gb_ping);
 }
 
 static PyObject * cmd_quit(client_obj *self) {
-    int res = gb_quit(&self->cl);
-    if (res != 0) {
-        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
-        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
-        return NULL;
-    }
-    return process_response(&self->cl);
+    return _generic_noargs_cmd(self, gb_quit);
 }
 
 static void _create_exceptions(PyObject *module) {
