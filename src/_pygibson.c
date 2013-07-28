@@ -6,6 +6,9 @@
 #   define DBG(f,...) // x
 #endif
 
+#define ERR_BUF_SIZE 1024
+static char __gb_error_buffer[ERR_BUF_SIZE] = {0};
+
 static PyObject * process_response(gbClient *cl) {
     switch(cl->reply.code) {
         case REPL_OK:
@@ -26,15 +29,12 @@ static PyObject * _process_val(gbBuffer *buf) {
     switch (buf->encoding) {
         case GB_ENC_PLAIN:
             DBG("DEBUG: _process_val(), encoding is GB_ENC_PLAIN, length is %d\n",buf->size);
-
             result = PyString_FromStringAndSize((char *)buf->buffer,
                     buf->size);
             return result;
         case GB_ENC_NUMBER:
             number = gb_reply_number(buf);
-
             DBG("DEBUG: _process_val(), encoding is GB_ENC_NUMBER, number is %ld\n",number);
-
             result = PyLong_FromLong(number);
             return result;
         default:
@@ -46,7 +46,6 @@ static PyObject * _process_val(gbBuffer *buf) {
 
 static PyObject * _process_kval(gbClient *cl) {
     DBG("DEBUG: _process_kval()\n");
-
     gbMultiBuffer mb;
     int i=0;
     PyObject *res = PyDict_New();
@@ -56,7 +55,6 @@ static PyObject * _process_kval(gbClient *cl) {
     gb_reply_multi(cl, &mb);
     for (i=0; i<mb.count; i++) {
         DBG("DEBUG: key '%s' found\n", mb.keys[i]);
-
         PyObject *val = _process_val(&mb.values[i]);
         if (val==NULL) {
             gb_reply_multi_free(&mb);
@@ -76,7 +74,6 @@ static gibson_exception * _get_exc(char err_code) {
     for (e = py_exceptions; e->name != NULL; e++) {
         if (err_code == e->err_code) return e;
     }
-    // What about gb_getlasterror here ?
     PyErr_SetString(PyExc_Exception,
             "Enemies everywhere, they are stealing my exceptions!!111");
     return NULL;
@@ -85,9 +82,10 @@ static gibson_exception * _get_exc(char err_code) {
 static void pygibson_set_exception(char err_code, char *message) {
     gibson_exception *e = _get_exc(err_code);
     if (e != NULL) {
-        if (message == NULL) message = e->name;
+        if (message == NULL) {
+            message = e->name;
+        }
         PyErr_SetString(e->exception, message);
-
         DBG("DEBUG: pygibson_set_exception(): setting exception '%s', message is '%s'\n",e->name, message);
     }
 }
@@ -116,7 +114,10 @@ client_init(client_obj *self, PyObject *args, PyObject *kwds) {
     int connect = gb_tcp_connect(&self->cl,
             NULL, 0, 3600);
     DBG("DEBUG: gb_tcp_connect(): %d\n", connect);
-
+    if (connect != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+    }
     return connect;
 }
 
@@ -130,7 +131,12 @@ _generic_key_ttl_cmd(client_obj *self, PyObject *args, fp_gb_key_ttl gb_f) {
     if (!PyArg_ParseTuple(args, "s#I", &k, &klen, &ttl)) {
         return NULL;
     }
-    gb_f(&self->cl, k, klen, ttl);
+    int res = gb_f(&self->cl, k, klen, ttl);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 
@@ -142,7 +148,12 @@ _generic_key_cmd(client_obj *self, PyObject *args, fp_gb_key gb_f) {
     if (!PyArg_ParseTuple(args, "s#", &k, &klen)) {
         return NULL;
     }
-    gb_f(&self->cl, k, klen);
+    int res = gb_f(&self->cl, k, klen);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 // ^^^^^^^^^^^^^^^^
@@ -155,7 +166,12 @@ static PyObject * cmd_set(client_obj *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s#s#I", &k, &klen, &v, &vlen, &ttl)) {
         return NULL;
     }
-    gb_set(&self->cl, k, klen, v, vlen, ttl);
+    int res = gb_set(&self->cl, k, klen, v, vlen, ttl);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 
@@ -165,7 +181,12 @@ static PyObject * cmd_mset(client_obj *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s#s#", &k, &klen, &v, &vlen)) {
         return NULL;
     }
-    gb_mset(&self->cl, k, klen, v, vlen);
+    int res = gb_mset(&self->cl, k, klen, v, vlen);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 
@@ -239,22 +260,42 @@ static PyObject * cmd_meta(client_obj *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s#s#", &key, &klen, &meta, &mlen)) {
         return NULL;
     }
-    gb_meta(&self->cl, key, klen, meta, mlen);
+    int res = gb_meta(&self->cl, key, klen, meta, mlen);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 
 static PyObject * cmd_stats(client_obj *self) {
-    gb_stats(&self->cl);
+    int res = gb_stats(&self->cl);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 
 static PyObject * cmd_ping(client_obj *self) {
-    gb_ping(&self->cl);
+    int res = gb_ping(&self->cl);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 
 static PyObject * cmd_quit(client_obj *self) {
-    gb_quit(&self->cl);
+    int res = gb_quit(&self->cl);
+    if (res != 0) {
+        gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
+        pygibson_set_exception(REPL_ERR, __gb_error_buffer);
+        return NULL;
+    }
     return process_response(&self->cl);
 }
 
