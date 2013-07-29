@@ -5,11 +5,23 @@ import os
 import pygibson
 
 from . import unittest
-from . import PyGibsonBaseTest
+from . import ServerSpawningTestCase
 from . import _pygibson as pg
 
 
-class PyGibsonExtensionTest(PyGibsonBaseTest):
+class PyGibsonExtensionTest(ServerSpawningTestCase):
+
+    def __init__(self, *args, **kwargs):
+        self.config_name = "default.conf"
+        super(PyGibsonExtensionTest, self).__init__(*args, **kwargs)
+
+    def setUp(self):
+        super(PyGibsonExtensionTest, self).setUp()
+        self._cl = pg._client()
+
+    def tearDown(self):
+        super(PyGibsonExtensionTest, self).tearDown()
+        self._cl = None
 
     def wait_nan(self, f):
         with self.assertRaises(pg.NaNError):
@@ -216,7 +228,12 @@ class PyGibsonExtensionTest(PyGibsonBaseTest):
         self.assertEqual(self._cl.mget(key).items(), [(key, 'atata')])
 
 
-class TestClient(unittest.TestCase):
+class TestClient(ServerSpawningTestCase):
+
+    def __init__(self, *args, **kwargs):
+        self.config_name = "default.conf"
+        super(TestClient, self).__init__(*args, **kwargs)
+
     def test_default_ttl(self):
         c = pygibson.Client()
         c.set("client_ttl", "val")
@@ -236,3 +253,14 @@ class TestClient(unittest.TestCase):
         with self.assertRaises(pygibson.NotFoundError):
             c.mget(os.urandom(128))
 
+
+class TestUnixSockets(ServerSpawningTestCase):
+    def __init__(self, *args, **kwargs):
+        self.config_name = "unix_socket.conf"
+        super(TestUnixSockets, self).__init__(*args, **kwargs)
+        self.client_kwargs['unix_socket'] = '/tmp/test_gibson.sock'
+
+    def test_unix_socket(self):
+        c = pygibson.Client(**self.client_kwargs)
+        c.set("unix_socket", "val", 600)
+        self.assertEqual(c.get("unix_socket"), "val")
