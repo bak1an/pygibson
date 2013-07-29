@@ -41,9 +41,16 @@ class ServerSpawningTestCase(unittest.TestCase):
         return '.'.join(self.id().split('.')[2:])
 
     def _run_gibson(self):
-        print "TESTSUITE [%s]: Starting gibson server..." % self._getid()
+        print "TESTSUITE [%s]: Starting gibson server ['%s']..." % (self._getid(),
+                                                                    self.config_name)
         args = [self.gibson_exec, "-c", self.config_path]
-        self._p = subprocess.Popen(args)
+        self._p = subprocess.Popen(args, stdout=subprocess.PIPE)
+        time.sleep(0.5)
+        self._p.poll()
+        if self._p.returncode:
+            out = self._p.stdout.read()
+            raise Exception("Can't run gibson server. Exitcode is %d. Stdout:\n%s" % (self._p.returncode,
+                                                                                      out))
         print "TESTSUITE [%s]: gibson pid is '%d'" % (self._getid(), self._p.pid)
 
     def _stop_gibson(self):
@@ -55,7 +62,6 @@ class ServerSpawningTestCase(unittest.TestCase):
 
     def setUp(self):
         self._run_gibson()
-        time.sleep(0.5)
         super(ServerSpawningTestCase, self).setUp()
 
     def tearDown(self):
