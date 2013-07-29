@@ -258,6 +258,9 @@ class TestUnixSockets(ServerSpawningTestCase):
     def __init__(self, *args, **kwargs):
         self.config_name = "unix_socket.conf"
         super(TestUnixSockets, self).__init__(*args, **kwargs)
+        self.client_kwargs['unix_socket'] = '/tmp/test_gibson.sock'
 
-    def test_nothing(self):
-        print "nothing tested successfully"
+    def test_unix_socket(self):
+        c = pygibson.Client(**self.client_kwargs)
+        c.set("unix_socket", "val", 600)
+        self.assertEqual(c.get("unix_socket"), "val")
