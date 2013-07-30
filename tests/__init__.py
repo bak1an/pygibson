@@ -62,8 +62,6 @@ class ServerSpawningTestCase(unittest.TestCase):
 
     def setUp(self):
         self._run_gibson()
+        self.addCleanup(self._stop_gibson)
         super(ServerSpawningTestCase, self).setUp()
 
-    def tearDown(self):
-        self._stop_gibson()
-        super(ServerSpawningTestCase, self).tearDown()

@@ -116,9 +116,24 @@ client_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 
 static int
 client_init(client_obj *self, PyObject *args, PyObject *kwds) {
-    int connect = gb_tcp_connect(&self->cl,
-            NULL, 0, 3600);
-    DBG("DEBUG: gb_tcp_connect(): %d\n", connect);
+    int port = 0, timeout = 0;
+    char *host = NULL, *unix_socket = NULL;
+    int connect = 0;
+    if (!PyArg_ParseTuple(args, "zizi", &host, &port,
+                &unix_socket, &timeout)) {
+        return -1;
+    }
+    if (host == NULL && unix_socket == NULL) {
+        pygibson_set_exception(REPL_ERR, "Please provide either host or port");
+        return -1;
+    }
+    if (unix_socket == NULL) {
+        connect = gb_tcp_connect(&self->cl, host, port, timeout);
+        DBG("DEBUG: gb_tcp_connect(): %d\n", connect);
+    } else {
+        int connect = gb_unix_connect(&self->cl, unix_socket, timeout);
+        DBG("DEBUG: gb_unix_connect(): %d\n", connect);
+    }
     if (connect != 0) {
         gb_getlasterror(__gb_error_buffer, ERR_BUF_SIZE);
         pygibson_set_exception(REPL_ERR, __gb_error_buffer);

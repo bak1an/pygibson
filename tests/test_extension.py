@@ -17,7 +17,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
 
     def setUp(self):
         super(PyGibsonExtensionTest, self).setUp()
-        self._cl = pg._client()
+        self._cl = pg._client("127.0.0.1", 10128, None, 60)
 
     def tearDown(self):
         super(PyGibsonExtensionTest, self).tearDown()
@@ -190,7 +190,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         # well, counting up to 3 is ok for me
 
     def test_quit(self):
-        some_client = pg._client()
+        some_client = pg._client("127.0.0.1", 10128, None, 60)
         self.assertIsNone(some_client.ping())
         self.assertIsNone(some_client.quit())
         # silly test
