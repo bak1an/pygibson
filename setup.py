@@ -27,9 +27,14 @@ _pygibson = Extension(
 )
 
 setup(
-    name="pygibson",
-    version="0.0.1",
+    name='pygibson',
+    description='Python client for gibson cache server',
+    author='Anton Baklanov',
+    author_email='antonbaklanov@gmail.com',
+    url='https://github.com/bak1an/pygibson',
+    license='MIT',
     ext_modules=[_pygibson],
     package_dir={'': 'src'},
-    py_modules=['pygibson']
+    py_modules=['pygibson'],
+    version="0.1.0"
 )
