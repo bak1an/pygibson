@@ -8,7 +8,7 @@ from _pygibson import LockedError
 
 class Client(_client):
     def __init__(self, addr="127.0.0.1", port=10128,
-                 unix_socket=None, timeout=60):
+                 unix_socket=None, timeout=1000):
         super(Client, self).__init__(addr, port, unix_socket, timeout)
 
     def set(self, key, value, ttl=0):

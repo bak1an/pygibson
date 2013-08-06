@@ -44,8 +44,8 @@ How to use?
     from pygibson import Client
     from pygibson import NotFoundError
 
-    cl = Client() # defaults, 127.0.0.1:10128, timeout=60
-    cl2 = Client(addr="192.168.1.33", port=4321, timeout=1000) # non defaults
+    cl = Client() # defaults, 127.0.0.1:10128, timeout=1000
+    cl2 = Client(addr="192.168.1.33", port=4321, timeout=1500) # non defaults
     cl3 = Client(unix_socket="/var/run/gibson.sock", timeout=500) # connects to unix socket with timeout set to 500
 
     cl.set("some_key", "some_value")
@@ -65,7 +65,7 @@ Client() class methods
 | __init__    | addr="127.0.0.1", | create Client() instance |
 |             | port=10128,       |                          |
 |             | unix_socket=None, |                          |
-|             | timeout=60        |                          |
+|             | timeout=1000      |                          |
 +-------------+-------------------+--------------------------+
 | set         |                   | do set                   |
 +-------------+-------------------+--------------------------+

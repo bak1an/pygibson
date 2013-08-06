@@ -124,7 +124,7 @@ client_init(client_obj *self, PyObject *args, PyObject *kwds) {
         return -1;
     }
     if (host == NULL && unix_socket == NULL) {
-        pygibson_set_exception(REPL_ERR, "Please provide either host or port");
+        pygibson_set_exception(REPL_ERR, "Provide either host:port or unix_socket");
         return -1;
     }
     if (unix_socket == NULL) {
