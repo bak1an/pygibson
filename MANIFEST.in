@@ -1,2 +1,9 @@
 include src/_pygibson.h
 include src/libgibsonclient/src/gibson.h
+include *.in
+include *.rst
+include *.sh
+include LICENSE
+include tox.ini
+recursive-include tests *.conf
+recursive-include tests *.py
