@@ -23,7 +23,7 @@ class ServerSpawningTestCase(unittest.TestCase):
         self.config_path = None
         if not hasattr(self, 'client_kwargs'):
             self.client_kwargs = {
-                'addr': '127.0.0.1',
+                'host': "127.0.0.1",
                 'port': 10128,
                 'unix_socket': None
             }

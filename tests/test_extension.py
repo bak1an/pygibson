@@ -62,6 +62,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
             "preef_key": "val3"
         }.items())
         self.wait_404(lambda: self._cl.mget("atatatatta"))
+        self.wait_404(lambda: self._cl.mset("atatatatta", "val"))
 
     def test_ttl_mttl(self):
         self._cl.set("ttl", "val", 1000)
