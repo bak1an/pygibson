@@ -1,6 +1,11 @@
 #include <Python.h>
 #include "libgibsonclient/src/gibson.h"
 
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K
+#endif
+
+
 typedef struct _client_obj {
     PyObject_HEAD
     gbClient cl;

@@ -300,18 +300,41 @@ static void _create_exceptions(PyObject *module) {
     }
 }
 
-#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
+#define _MOD_NAME "_pygibson"
+#define _MOD_DOCSTRING "_pygibson extension"
+
+#ifdef IS_PY3K
+    static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        _MOD_NAME,              /* m_name */
+        _MOD_DOCSTRING,         /* m_doc */
+        -1,                     /* m_size */
+        module_methods,         /* m_methods */
+        NULL,                   /* m_reload */
+        NULL,                   /* m_traverse */
+        NULL,                   /* m_clear */
+        NULL,                   /* m_free */
+    };
+    #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
+#else
+    #define MOD_INIT(name) PyMODINIT_FUNC init##name(void)
 #endif
-PyMODINIT_FUNC init_pygibson() {
+
+MOD_INIT(_pygibson) {
     PyObject *m;
     if (PyType_Ready(&client_type) < 0) {
         return;
     }
-    m = Py_InitModule3("_pygibson", module_methods,
-            "_pygibson extension");
+#ifdef IS_PY3K
+    m = PyModule_Create(&moduledef);
+#else
+    m = Py_InitModule3(_MOD_NAME, module_methods, _MOD_DOCSTRING);
+#endif
     Py_INCREF(&client_type);
     PyModule_AddObject(m, "_client", (PyObject *)&client_type);
     _create_exceptions(m);
+#ifdef IS_PY3K
+    return m;
+#endif
 }
 
