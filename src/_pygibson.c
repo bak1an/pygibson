@@ -1,9 +1,9 @@
 #include "_pygibson.h"
 
 #ifdef PYGIBSON_DEBUG
-#   define DBG printf
+#define DBG printf
 #else
-#   define DBG(f,...) // x
+#define DBG(f,...)
 #endif
 
 #define ERR_BUF_SIZE 1024
@@ -29,7 +29,7 @@ static PyObject * _process_val(gbBuffer *buf) {
     switch (buf->encoding) {
         case GB_ENC_PLAIN:
             DBG("DEBUG: _process_val(), encoding is GB_ENC_PLAIN, length is %d\n",buf->size);
-            result = PyString_FromStringAndSize((char *)buf->buffer,
+            result = PyBytes_FromStringAndSize((char *)buf->buffer,
                     buf->size);
             return result;
         case GB_ENC_NUMBER:
@@ -323,7 +323,11 @@ static void _create_exceptions(PyObject *module) {
 MOD_INIT(_pygibson) {
     PyObject *m;
     if (PyType_Ready(&client_type) < 0) {
+#ifdef IS_PY3K
+        return NULL;
+#else
         return;
+#endif
     }
 #ifdef IS_PY3K
     m = PyModule_Create(&moduledef);

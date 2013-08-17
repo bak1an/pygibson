@@ -5,6 +5,9 @@
 #define IS_PY3K
 #endif
 
+#ifndef IS_PY3K
+#include <bytesobject.h>
+#endif
 
 typedef struct _client_obj {
     PyObject_HEAD
