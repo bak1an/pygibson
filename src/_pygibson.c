@@ -99,7 +99,7 @@ static void
 client_dealloc(client_obj *self) {
     free(self->cl.reply.buffer);
     free(self->cl.request.buffer);
-    self->ob_type->tp_free((PyObject *)self);
+    Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 static PyObject *

@@ -101,8 +101,7 @@ static int
 client_init(client_obj *self, PyObject *args, PyObject *kwds);
 
 static PyTypeObject client_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                       /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_pygibson._client",                     /* tp_name */
     sizeof(client_obj),                      /* tp_basicsize */
     0,                                       /* tp_itemsize */
