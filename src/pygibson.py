@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from _pygibson import _client
 from _pygibson import PyGibsonError
 from _pygibson import NotFoundError
