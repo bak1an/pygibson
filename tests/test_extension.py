@@ -1,12 +1,24 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import time
 import os
+import sys
 import pygibson
 
 from . import unittest
 from . import ServerSpawningTestCase
 from . import _pygibson as pg
+
+PY3 = sys.version_info[0] == 3
+
+if PY3:
+    def b(s):
+        return s.encode("latin1")
+else:
+    def b(s):
+        return s
 
 
 class PyGibsonExtensionTest(ServerSpawningTestCase):
@@ -40,10 +52,10 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
 
     def test_set_get(self):
         self._cl.set("key", "val", 600)
-        self.assertEqual(self._cl.get("key"), "val")
+        self.assertEqual(self._cl.get("key"), b("val"))
         self.wait_404(lambda: self._cl.get("404"))
         self._cl.set("key2", "val2", 2)
-        self.assertEqual(self._cl.get("key2"), "val2")
+        self.assertEqual(self._cl.get("key2"), b("val2"))
         time.sleep(3)
         self.wait_404(lambda: self._cl.get("key2"))
 
@@ -52,14 +64,14 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         self._cl.set("pref_koy", "val2", 100)
         self._cl.set("preef_key", "val3", 100)
         self.assertEqual(self._cl.mset("pref_", "opppa"), 2)
-        self.assertEqual(self._cl.get("pref_key"), "opppa")
-        self.assertEqual(self._cl.get("pref_koy"), "opppa")
-        self.assertEqual(self._cl.get("preef_key"), "val3")
+        self.assertEqual(self._cl.get("pref_key"), b("opppa"))
+        self.assertEqual(self._cl.get("pref_koy"), b("opppa"))
+        self.assertEqual(self._cl.get("preef_key"), b("val3"))
         mget = self._cl.mget("pre")
         self.assertItemsEqual(mget.items(), {
-            "pref_key": "opppa",
-            "pref_koy": "opppa",
-            "preef_key": "val3"
+            "pref_key": b("opppa"),
+            "pref_koy": b("opppa"),
+            "preef_key": b("val3")
         }.items())
         self.wait_404(lambda: self._cl.mget("atatatatta"))
         self.wait_404(lambda: self._cl.mset("atatatatta", "val"))
@@ -67,34 +79,34 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
     def test_ttl_mttl(self):
         self._cl.set("ttl", "val", 1000)
         time.sleep(3)
-        self.assertEqual(self._cl.get("ttl"), "val")
+        self.assertEqual(self._cl.get("ttl"), b("val"))
         self._cl.ttl("ttl", 2)
         time.sleep(3)
         self.wait_404(lambda: self._cl.get("ttl"))
         self._cl.set("TTL1", "val1", 1000)
         self._cl.set("TTL2", "val2", 1000)
         time.sleep(3)
-        self.assertEqual(self._cl.get("TTL1"), "val1")
-        self.assertEqual(self._cl.get("TTL2"), "val2")
+        self.assertEqual(self._cl.get("TTL1"), b("val1"))
+        self.assertEqual(self._cl.get("TTL2"), b("val2"))
         self.assertEqual(self._cl.mttl("TTL", 2), 2)
         time.sleep(3)
         self.wait_404(lambda: self._cl.mget("TTL"))
 
     def test_del_mdel(self):
         self._cl.set("del", "val", 1000)
-        self.assertEqual(self._cl.get("del"), "val")
+        self.assertEqual(self._cl.get("del"), b("val"))
         self.assertIsNone(self._cl.dl("del"))
         self.wait_404(lambda: self._cl.get("del"))
         self._cl.set("DEL1", "val1", 1000)
         self._cl.set("DEL2", "val2", 1000)
-        self.assertEqual(self._cl.get("DEL1"), "val1")
-        self.assertEqual(self._cl.get("DEL2"), "val2")
+        self.assertEqual(self._cl.get("DEL1"), b("val1"))
+        self.assertEqual(self._cl.get("DEL2"), b("val2"))
         self.assertEqual(self._cl.mdl("DEL"), 2)
         self.wait_404(lambda: self._cl.mget("DEL"))
 
     def test_inc_dec_minc_mdec(self):
         self._cl.set("some_number", "50", 1000)
-        self.assertEqual(self._cl.get("some_number"), "50")
+        self.assertEqual(self._cl.get("some_number"), b("50"))
         self.assertEqual(self._cl.inc("some_number"), 51)
         self.assertEqual(self._cl.get("some_number"), 51)
         self.assertEqual(self._cl.dec("some_number"), 50)
@@ -130,7 +142,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
             "num1": 51,
             "num2": 101,
             "num3": 151,
-            "num4": "xuy"
+            "num4": b("xuy")
         }.items())
 
     def test_stats(self):
@@ -156,10 +168,10 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         self._cl.set("lock", "val", 600)
         self._cl.lock("lock", 2)
         self.wait_locked(lambda: self._cl.set("lock", "val2", 600))
-        self.assertEqual(self._cl.get("lock"), "val")
+        self.assertEqual(self._cl.get("lock"), b("val"))
         time.sleep(3)
         self._cl.set("lock", "val2", 600)
-        self.assertEqual(self._cl.get("lock"), "val2")
+        self.assertEqual(self._cl.get("lock"), b("val2"))
         self._cl.set("lock_num", "100500", 600)
         self._cl.set("lock_num2", "500100", 600)
         self._cl.set("lock_num3", "1", 600)
@@ -214,18 +226,18 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         self._cl.set("KEYS2", "val1", 600)
         self._cl.set("KEYS3", "val2", 600)
         self.assertItemsEqual(self._cl.keys("KEY").items(), {
-            "0": "KEYS1",
-            "1": "KEYS2",
-            "2": "KEYS3"
+            "0": b("KEYS1"),
+            "1": b("KEYS2"),
+            "2": b("KEYS3")
         }.items())
 
     def test_bin_data(self):
-        data = '\xfd\xbb{\xbc\xfa[\xe5\xfatI#\x00\xdbE;\x89A@\xc8)'
-        key = u'Водка'.encode('utf-8')
+        data = b('\xfd\xbb{\xbc\xfa[\xe5\xfatI#\x00\xdbE;\x89A@\xc8)')
+        key = 'Водка'.encode('utf-8')
         self._cl.set("BIN1", data, 600)
         self._cl.set(key, "atata", 600)
         self.assertEqual(self._cl.get("BIN1"), data)
-        self.assertEqual(self._cl.get(key), "atata")
+        self.assertEqual(self._cl.get(key), b("atata"))
         self.assertEqual(self._cl.mget(key).items(), [(key, 'atata')])
 
 
@@ -247,7 +259,7 @@ class TestClient(ServerSpawningTestCase):
         c.set("KEYS3", "val2", 600)
         keys = c.keys("KEY")
         self.assertTrue(isinstance(keys, list))
-        self.assertItemsEqual(keys, ["KEYS1", "KEYS2", "KEYS3"])
+        self.assertItemsEqual(keys, [b("KEYS1"), b("KEYS2"), b("KEYS3")])
 
     def test_exceptions(self):
         c = pygibson.Client()
@@ -264,4 +276,4 @@ class TestUnixSockets(ServerSpawningTestCase):
     def test_unix_socket(self):
         c = pygibson.Client(**self.client_kwargs)
         c.set("unix_socket", "val", 600)
-        self.assertEqual(c.get("unix_socket"), "val")
+        self.assertEqual(c.get("unix_socket"), b("val"))
