@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import time
 import os
 import sys
@@ -233,12 +231,16 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
 
     def test_bin_data(self):
         data = b('\xfd\xbb{\xbc\xfa[\xe5\xfatI#\x00\xdbE;\x89A@\xc8)')
-        key = 'Водка'.encode('utf-8')
+        key = 'Водка'
         self._cl.set("BIN1", data, 600)
         self._cl.set(key, "atata", 600)
         self.assertEqual(self._cl.get("BIN1"), data)
         self.assertEqual(self._cl.get(key), b("atata"))
-        self.assertEqual(self._cl.mget(key).items(), [(key, 'atata')])
+        self.assertEqual(self._cl.mget(key).items(), {key: b('atata')}.items())
+        self._cl.set(data, data, 600)
+        self.assertEqual(self._cl.get(data), data)
+        self.assertEqual(self._cl.mget(data).items(),
+                         {data: data}.items())
 
 
 class TestClient(ServerSpawningTestCase):
