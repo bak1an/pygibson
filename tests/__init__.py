@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import _pygibson
 
 import os
@@ -11,13 +13,14 @@ if platform.python_version() < '2.7':
     try:
         unittest = __import__('unittest2')
     except ImportError:
-        print "Install unittest2 to run tests on python2.6"
+        print("Install unittest2 to run tests on python2.6")
         raise
 else:
     import unittest
 
 
 class ServerSpawningTestCase(unittest.TestCase):
+
     def __init__(self, *args, **kwargs):
         self.gibson_exec = find_executable("gibson")
         self.config_path = None
@@ -41,8 +44,8 @@ class ServerSpawningTestCase(unittest.TestCase):
         return '.'.join(self.id().split('.')[2:])
 
     def _run_gibson(self):
-        print "TESTSUITE [%s]: Starting gibson server ['%s']..." % (self._getid(),
-                                                                    self.config_name)
+        print("TESTSUITE [%s]: Starting gibson server ['%s']..." % (self._getid(),
+                                                                    self.config_name))
         args = [self.gibson_exec, "-c", self.config_path]
         self._p = subprocess.Popen(args, stdout=subprocess.PIPE)
         time.sleep(0.5)
@@ -51,14 +54,14 @@ class ServerSpawningTestCase(unittest.TestCase):
             out = self._p.stdout.read()
             raise Exception("Can't run gibson server. Exitcode is %d. Stdout:\n%s" % (self._p.returncode,
                                                                                       out))
-        print "TESTSUITE [%s]: gibson pid is '%d'" % (self._getid(), self._p.pid)
+        print("TESTSUITE [%s]: gibson pid is '%d'" % (self._getid(), self._p.pid))
 
     def _stop_gibson(self):
         if self._p:
-            print "TESTSUITE [%s]: Stopping gibson server..." % self._getid()
+            print("TESTSUITE [%s]: Stopping gibson server..." % self._getid())
             self._p.terminate()
             self._p.wait()
-            print "TESTSUITE [%s]: Stopped!" % self._getid()
+            print("TESTSUITE [%s]: Stopped!" % self._getid())
 
     def setUp(self):
         self._run_gibson()

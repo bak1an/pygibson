@@ -28,5 +28,7 @@ if __name__ == "__main__":
             suite.addTest(filter_tests(discovered))
     else:
         suite = discovered
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    res = unittest.TextTestRunner(verbosity=2).run(suite)
+    if not res.wasSuccessful():
+        sys.exit(1)
 

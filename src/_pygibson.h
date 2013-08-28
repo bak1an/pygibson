@@ -1,6 +1,14 @@
 #include <Python.h>
 #include "libgibsonclient/src/gibson.h"
 
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K
+#endif
+
+#ifndef IS_PY3K
+#include <bytesobject.h>
+#endif
+
 typedef struct _client_obj {
     PyObject_HEAD
     gbClient cl;
@@ -101,8 +109,7 @@ static int
 client_init(client_obj *self, PyObject *args, PyObject *kwds);
 
 static PyTypeObject client_type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                                       /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "_pygibson._client",                     /* tp_name */
     sizeof(client_obj),                      /* tp_basicsize */
     0,                                       /* tp_itemsize */
