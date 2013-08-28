@@ -21,9 +21,6 @@ else:
 
 class ServerSpawningTestCase(unittest.TestCase):
 
-    if not hasattr(unittest.TestCase, 'assertItemsEqual'):
-        assertItemsEqual = unittest.TestCase.assertSameElements
-
     def __init__(self, *args, **kwargs):
         self.gibson_exec = find_executable("gibson")
         self.config_path = None

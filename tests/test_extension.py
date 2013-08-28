@@ -66,7 +66,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         self.assertEqual(self._cl.get("pref_koy"), b("opppa"))
         self.assertEqual(self._cl.get("preef_key"), b("val3"))
         mget = self._cl.mget("pre")
-        self.assertItemsEqual(mget.items(), {
+        self.assertEqual(mget.items(), {
             "pref_key": b("opppa"),
             "pref_koy": b("opppa"),
             "preef_key": b("val3")
@@ -123,20 +123,20 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         self._cl.set("num2", "100", 1000)
         self._cl.set("num3", "150", 1000)
         self.assertEqual(self._cl.minc("num"), 3)
-        self.assertItemsEqual(self._cl.mget("num").items(), {
+        self.assertEqual(self._cl.mget("num").items(), {
             "num1": 51,
             "num2": 101,
             "num3": 151
         }.items())
         self.assertEqual(self._cl.mdec("num"), 3)
-        self.assertItemsEqual(self._cl.mget("num").items(), {
+        self.assertEqual(self._cl.mget("num").items(), {
             "num1": 50,
             "num2": 100,
             "num3": 150
         }.items())
         self._cl.set("num4", "xuy", 1000)
         self.assertEqual(self._cl.minc("num"), 3)
-        self.assertItemsEqual(self._cl.mget("num").items(), {
+        self.assertEqual(self._cl.mget("num").items(), {
             "num1": 51,
             "num2": 101,
             "num3": 151,
@@ -223,7 +223,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         self._cl.set("KEYS1", "val", 600)
         self._cl.set("KEYS2", "val1", 600)
         self._cl.set("KEYS3", "val2", 600)
-        self.assertItemsEqual(self._cl.keys("KEY").items(), {
+        self.assertEqual(self._cl.keys("KEY").items(), {
             "0": b("KEYS1"),
             "1": b("KEYS2"),
             "2": b("KEYS3")
@@ -237,10 +237,6 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         self.assertEqual(self._cl.get("BIN1"), data)
         self.assertEqual(self._cl.get(key), b("atata"))
         self.assertEqual(self._cl.mget(key).items(), {key: b('atata')}.items())
-        self._cl.set(data, data, 600)
-        self.assertEqual(self._cl.get(data), data)
-        self.assertEqual(self._cl.mget(data).items(),
-                         {data: data}.items())
 
 
 class TestClient(ServerSpawningTestCase):
@@ -256,12 +252,14 @@ class TestClient(ServerSpawningTestCase):
 
     def test_keys(self):
         c = pygibson.Client()
-        c.set("KEYS1", "val", 600)
-        c.set("KEYS2", "val1", 600)
-        c.set("KEYS3", "val2", 600)
-        keys = c.keys("KEY")
-        self.assertTrue(isinstance(keys, list))
-        self.assertItemsEqual(keys, [b("KEYS1"), b("KEYS2"), b("KEYS3")])
+        keys1 = [b("KEYS1"), b("KEYS2"), b("KEYS3")]
+        for k in keys1:
+            c.set(k, "v", 600)
+        keys2 = c.keys("KEY")
+        self.assertTrue(isinstance(keys2, list))
+        self.assertEqual(len(keys1), len(keys2))
+        for k in keys1:
+            self.assertTrue(k in keys2)
 
     def test_exceptions(self):
         c = pygibson.Client()
