@@ -1,4 +1,4 @@
-  :version: 0.1.0
+  :version: 0.2.0
 
 pygibson
 ========
@@ -11,8 +11,7 @@ Python client for gibson_ cache server.
 Which python versions are supported?
 ------------------------------------
 
-Currently testsuite runs with python 2.6 and 2.7. Python 3.x support is in
-progress.
+Currently testsuite runs with python 2.6, 2.7, 3.2 and 3.3.
 
 All tests are passing successfully with PyPy 2.0.2 but since pygibson is
 implemented as CPython extension it's not recommended to use it with PyPy. We
@@ -120,6 +119,8 @@ Client() class methods
 | quit_       |                   | Disconnect.                                                                       |
 +-------------+-------------------+-----------------------------------------------------------------------------------+
 
+    :NOTE: values packed in **bytes** are returned from *get*, *mget* and  *keys* under python 3.
+
 .. _set: http://gibson-db.in/command-set.php
 .. _mset: http://gibson-db.in/command-mset.php
 .. _ttl: http://gibson-db.in/command-ttl.php
@@ -170,7 +171,6 @@ Here is a list of exceptions which are available in **pygibson** module:
 Roadmap
 =======
 
-- Python 3
 - Connection pool
 - Ability to connect multiple servers
 - Better pypy support

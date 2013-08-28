@@ -48,10 +48,9 @@ setup(
         "Operating System :: POSIX :: BSD",
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Software Development :: Libraries"
     ],
-    version="0.1.0"
+    version="0.2.0"
 )
