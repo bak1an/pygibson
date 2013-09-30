@@ -6,7 +6,7 @@ die() {
 }
 
 usage() {
-    echo "$0 [--build|-b] [--debug|-d] [--logs|-l] [test_extension.TestUnixSockets]"
+    echo "$0 [--build|-b] [--debug|-d] [--logs|-l] [--gibson|-g] [test_extension.TestUnixSockets]"
     exit 1;
 }
 
@@ -22,8 +22,9 @@ EOT`
 LOGS="/dev/null"
 BUILD=""
 DEBUG=""
+BUILD_GIBSON=""
 
-TEMP=`getopt -o bdlh --long build,debug,logs,help -n 'runtests.sh' -- "$@"`
+TEMP=`getopt -o bdlhg --long build,debug,logs,help,--gibson -n 'runtests.sh' -- "$@"`
 
 if [ $? != 0 ] ; then usage ; fi
 
@@ -34,11 +35,29 @@ while true; do
         -b|--build) BUILD="1"; shift;;
         -d|--debug) DEBUG="--pygibson-debug"; shift;;
         -l|--logs)  LOGS="/tmp/pygibson.test.log"; shift;;
+        -g|--gibson) BUILD_GIBSON="yeah"; shift;;
         -h|--help)  usage; shift;;
         --) shift; break;;
         *) usage;;
     esac
 done;
+
+if [ -n "$BUILD_GIBSON" ]; then
+    if [ ! -d ".gibson_build" ]; then
+        echo "building gibson..."
+        mkdir .gibson_build
+        cd .gibson_build
+        git clone --depth 1 https://github.com/evilsocket/gibson.git || die "can't fetch gibson"
+        cd gibson
+        make clean
+        cmake . || die "can't build gibson server"
+        make || die "can't build gibson server"
+        export PATH=$PATH:"`pwd`"
+        cd ../..
+    else
+        export PATH=$PATH:"`pwd`/.gibson_build/gibson"
+    fi;
+fi;
 
 if [ -n "$BUILD" ]; then
     python setup.py clean --all;

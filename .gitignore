@@ -38,3 +38,5 @@ MANIFEST
 
 # Vim swap files
 *.swp
+
+.gibson_build
