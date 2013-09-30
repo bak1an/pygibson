@@ -1,5 +1,7 @@
   :version: 0.2.0
 
+.. image:: https://api.travis-ci.org/bak1an/pygibson.png
+
 pygibson
 ========
 
