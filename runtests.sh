@@ -49,7 +49,6 @@ if [ -n "$BUILD_GIBSON" ]; then
         cd .gibson_build
         git clone --depth 1 https://github.com/evilsocket/gibson.git || die "can't fetch gibson"
         cd gibson
-        make clean
         cmake . || die "can't build gibson server"
         make || die "can't build gibson server"
         export PATH=$PATH:"`pwd`"
