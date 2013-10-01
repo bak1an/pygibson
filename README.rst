@@ -1,6 +1,9 @@
   :version: 0.2.0
 
-.. image:: https://api.travis-ci.org/bak1an/pygibson.png
+|build_status|_
+
+.. |build_status| image:: https://api.travis-ci.org/bak1an/pygibson.png
+.. _build_status: https://travis-ci.org/bak1an/pygibson
 
 pygibson
 ========
