@@ -27,7 +27,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
 
     def setUp(self):
         super(PyGibsonExtensionTest, self).setUp()
-        self._cl = pg._client("127.0.0.1", 10128, None, 1000)
+        self._cl = pg._client("127.0.0.1", 10128, None, 5000)
 
     def tearDown(self):
         super(PyGibsonExtensionTest, self).tearDown()
@@ -201,7 +201,7 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         # well, counting up to 3 is ok for me
 
     def test_quit(self):
-        some_client = pg._client("127.0.0.1", 10128, None, 1000)
+        some_client = pg._client("127.0.0.1", 10128, None, 5000)
         self.assertIsNone(some_client.ping())
         self.assertIsNone(some_client.quit())
         # silly test
@@ -245,26 +245,27 @@ class TestClient(ServerSpawningTestCase):
         self.config_name = "default.conf"
         super(TestClient, self).__init__(*args, **kwargs)
 
+    def setUp(self):
+        super(TestClient, self).setUp()
+        self._c = pygibson.Client(timeout=5000)
+
     def test_default_ttl(self):
-        c = pygibson.Client()
-        c.set("client_ttl", "val")
-        self.assertEqual(c.meta("client_ttl", "ttl"), -1)
+        self._c.set("client_ttl", "val")
+        self.assertEqual(self._c.meta("client_ttl", "ttl"), -1)
 
     def test_keys(self):
-        c = pygibson.Client()
         keys1 = [b("KEYS1"), b("KEYS2"), b("KEYS3")]
         for k in keys1:
-            c.set(k, "v", 600)
-        keys2 = c.keys("KEY")
+            self._c.set(k, "v", 600)
+        keys2 = self._c.keys("KEY")
         self.assertTrue(isinstance(keys2, list))
         self.assertEqual(len(keys1), len(keys2))
         for k in keys1:
             self.assertTrue(k in keys2)
 
     def test_exceptions(self):
-        c = pygibson.Client()
         with self.assertRaises(pygibson.NotFoundError):
-            c.mget(os.urandom(128))
+            self._c.mget(os.urandom(128))
 
 
 class TestUnixSockets(ServerSpawningTestCase):
