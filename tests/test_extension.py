@@ -144,13 +144,14 @@ class PyGibsonExtensionTest(ServerSpawningTestCase):
         }.items())
 
     def test_stats(self):
-        keys = ['reqs_per_client_avg', 'server_time', 'server_allocator',
-                'total_items', 'first_item_seen', 'total_cron_done',
-                'item_size_avg', 'server_version', 'server_arch',
-                'total_compressed_items', 'last_item_seen', 'memory_fragmentation',
-                'memory_used', 'server_started', 'total_connections',
-                'server_build_datetime', 'memory_peak', 'memory_usable',
-                'memory_available', 'total_clients', 'compr_rate_avg', 'total_requests']
+        keys = ['reqs_per_client_avg', 'server_time', 'server_allocator', 'total_items',
+                'first_item_seen', 'total_cron_done', 'item_size_avg', 'memory_peak',
+                'server_arch', 'item_pool_max_block_size', 'last_item_seen',
+                'memory_fragmentation', 'memory_used', 'server_started',
+                'item_pool_total_capacity', 'item_pool_current_used',
+                'total_connections', 'server_build_datetime', 'item_pool_current_capacity',
+                'server_version', 'memory_usable', 'memory_available', 'total_clients',
+                'total_compressed_items', 'item_pool_object_size', 'compr_rate_avg', 'total_requests']
         stats = self._cl.stats()
         self.assertTrue(isinstance(stats, dict))
         for k in keys:
