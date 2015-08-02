@@ -52,5 +52,5 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Software Development :: Libraries"
     ],
-    version="0.2.0"
+    version="0.2.1"
 )

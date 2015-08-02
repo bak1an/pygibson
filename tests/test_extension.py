@@ -266,7 +266,7 @@ class TestClient(ServerSpawningTestCase):
 
     def test_exceptions(self):
         with self.assertRaises(pygibson.NotFoundError):
-            self._c.mget(os.urandom(128))
+            self._c.mget(b('nosuchkey'))
 
 
 class TestUnixSockets(ServerSpawningTestCase):
